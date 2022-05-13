@@ -1,0 +1,71 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "mysql"
+  url      = "mysql://root:password@localhost:3306/prismaDB?schema=public"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  username  String
+  password  String
+  role      Role     @default(USER)
+  create_at DateTime   @default(now())
+  update_at DateTime   @default(now())
+
+  @@map("user")
+}
+
+model Car {
+  id        Int      @id @default(autoincrement())
+  name      String
+  model     String?
+  year      Int
+  createAt  DateTime   @default(now())
+  updateAt  DateTime   @default(now())
+  price     Float
+  url_image String
+
+  @@map("car")
+  SaleCar SaleCar[]
+}
+
+model Sale {
+  id          Int        @id @default(autoincrement())
+  userId      Int
+  total_price Float
+  sale_date   DateTime   @default(now())
+  status      SaleStatus @default(order_made)
+
+  @@map("sale")
+  SaleCar SaleCar[]
+}
+
+model SaleCar {
+  sale_id  Int
+  sale     Sale @relation(fields: [sale_id], references: [id])
+  car_id   Int
+  car      Car  @relation(fields: [car_id], references: [id])
+  quantity Int
+
+  @@id([sale_id, car_id])
+  @@map("sale_car")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum SaleStatus {
+  order_made
+  approved
+  on_My_Way
+  delivered
+}
